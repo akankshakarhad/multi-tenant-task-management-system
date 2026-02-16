@@ -113,6 +113,33 @@ async function commentMentioned({ task, comment, actor, mentionedUserId }) {
   });
 }
 
+async function goalAssigned({ goal, project, userId, actor }) {
+  const monthLabel = new Date(goal.month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  return create({
+    recipient: userId,
+    type: 'GOAL_ASSIGNED',
+    message: `${actor.name} set a goal of ${goal.targetCount} tasks for you on "${project.name}" for ${monthLabel}`,
+    company: actor.company,
+    companyId: actor.companyId,
+    triggeredBy: actor._id,
+    relatedType: 'Goal',
+    relatedId: goal._id,
+  });
+}
+
+async function feedbackReceived({ feedback, project, userId, actor }) {
+  return create({
+    recipient: userId,
+    type: 'FEEDBACK_RECEIVED',
+    message: `${actor.name} gave you ${feedback.rating}/5 feedback on "${project.name}"`,
+    company: actor.company,
+    companyId: actor.companyId,
+    triggeredBy: actor._id,
+    relatedType: 'Feedback',
+    relatedId: feedback._id,
+  });
+}
+
 module.exports = {
   setIO,
   getIO,
@@ -121,4 +148,6 @@ module.exports = {
   taskStatusChanged,
   commentAdded,
   commentMentioned,
+  goalAssigned,
+  feedbackReceived,
 };

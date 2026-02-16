@@ -1,0 +1,56 @@
+.settings-page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: settingsFadeIn 0.5s ease;
+}
+
+@keyframes settingsFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.settings-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 24px 0;
+}
+
+.settings-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.settings-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.settings-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.settings-card-header svg {
+  color: #4a90d9;
+}
+
+.settings-card-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.settings-coming-soon {
+  color: #aaa;
+  font-size: 14px;
+  margin: 0;
+  padding: 8px 0 4px 30px;
+}

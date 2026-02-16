@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './components/Toast';
 import Navbar from './components/Navbar';
+import UserAvatar from './components/UserAvatar';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
@@ -11,6 +12,9 @@ import ProjectDetail from './pages/ProjectDetail';
 import Tasks from './pages/Tasks';
 import TaskDetail from './pages/TaskDetail';
 import AuditLog from './pages/AuditLog';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
+import Goals from './pages/Goals';
 
 function App() {
   return (
@@ -18,6 +22,7 @@ function App() {
       <ToastProvider>
         <Router>
           <Navbar />
+          <UserAvatar />
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
@@ -28,7 +33,11 @@ function App() {
             <Route path="/projects/:id" element={<ProjectDetail />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/tasks/:id" element={<TaskDetail />} />
+            <Route path="/feedback" element={<Navigate to="/goals" replace />} />
+            <Route path="/goals" element={<Goals />} />
             <Route path="/audit-log" element={<AuditLog />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </Router>
       </ToastProvider>

@@ -38,6 +38,19 @@ const PERMISSIONS = {
 
   // ── Dashboard ────────────────────────────────────────
   'dashboard:view':   ['ADMIN', 'MANAGER', 'MEMBER'],
+
+  // ── Profile / Analytics ─────────────────────────────
+  'profile:view':     ['ADMIN', 'MANAGER', 'MEMBER'],
+  'profile:view-any': ['ADMIN', 'MANAGER'],
+
+  // ── Feedback ────────────────────────────────────────
+  'feedback:create':  ['MANAGER'],
+  'feedback:list':    ['ADMIN', 'MANAGER', 'MEMBER'],
+
+  // ── Goals ───────────────────────────────────────────
+  'goals:create':     ['ADMIN', 'MANAGER'],
+  'goals:update':     ['ADMIN', 'MANAGER'],
+  'goals:list':       ['ADMIN', 'MANAGER', 'MEMBER'],
 };
 
 module.exports = { ROLES, PERMISSIONS };

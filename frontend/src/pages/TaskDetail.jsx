@@ -6,6 +6,20 @@ import { useToast } from '../components/Toast';
 import ProtectedRoute from '../components/ProtectedRoute';
 import '../styles/Tasks.css';
 
+function renderCommentText(text) {
+  // Match @"Quoted Name" or @SingleName
+  const parts = text.split(/(@"[^"]+"|@\w+)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('@"') && part.endsWith('"')) {
+      return <strong key={i} className="mention-highlight">{part.slice(1).replace(/^"|"$/g, '')}</strong>;
+    }
+    if (part.startsWith('@') && part.length > 1) {
+      return <strong key={i} className="mention-highlight">{part.slice(1)}</strong>;
+    }
+    return part;
+  });
+}
+
 const STATUS_FLOW = {
   TODO: ['IN_PROGRESS'],
   IN_PROGRESS: ['IN_REVIEW', 'TODO', 'BLOCKER'],
@@ -278,12 +292,7 @@ const TaskDetailInner = () => {
                         )}
                       </div>
                     </div>
-                    <p className="comment-text">{comment.text}</p>
-                    {comment.mentions?.length > 0 && (
-                      <div className="comment-mentions">
-                        Mentioned: {comment.mentions.map((m) => m.name || m).join(', ')}
-                      </div>
-                    )}
+                    <p className="comment-text">{renderCommentText(comment.text)}</p>
                   </div>
                 ))
               )}

@@ -27,6 +27,13 @@ const Dashboard = () => {
 
   const canCreate = ['ADMIN', 'MANAGER'].includes(user.role);
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+
   const formatDate = (d) => {
     if (!d) return 'No date';
     return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -43,7 +50,7 @@ const Dashboard = () => {
       <div className="dashboard">
         <div className="dashboard-header">
           <div>
-            <h1>Welcome back, {user.name}</h1>
+            <h1>{getGreeting()}, {user.name}</h1>
             <span className="company-badge">{user.companyName}</span>
             <span className={`role-badge role-${user.role?.toLowerCase()}`}>{user.role}</span>
           </div>

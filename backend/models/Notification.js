@@ -15,6 +15,8 @@ const notificationSchema = new mongoose.Schema(
         'TASK_STATUS_CHANGED',
         'COMMENT_ADDED',
         'COMMENT_MENTIONED',
+        'GOAL_ASSIGNED',
+        'FEEDBACK_RECEIVED',
       ],
     },
     message: {
@@ -38,7 +40,7 @@ const notificationSchema = new mongoose.Schema(
     // Polymorphic reference to the related entity
     relatedType: {
       type: String,
-      enum: ['Task', 'Comment'],
+      enum: ['Task', 'Comment', 'Goal', 'Feedback'],
       default: null,
     },
     relatedId: {

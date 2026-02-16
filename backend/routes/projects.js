@@ -201,7 +201,7 @@ router.get('/:id', projectIdParamRules, permit('projects:read'), async (req, res
  */
 router.post('/', createProjectRules, permit('projects:create'), async (req, res, next) => {
   try {
-    const { name, description, members } = req.body;
+    const { name, description, members, deadline } = req.body;
 
     const memberSet = new Set((members || []).map(String));
     memberSet.add(String(req.user._id));
@@ -213,6 +213,7 @@ router.post('/', createProjectRules, permit('projects:create'), async (req, res,
       companyId: req.user.companyId,
       createdBy: req.user._id,
       members: [...memberSet],
+      deadline: deadline || null,
     });
 
     const populated = await project.populate(populateFields);
@@ -279,10 +280,11 @@ router.put('/:id', updateProjectRules, permit('projects:update'), async (req, re
       return res.status(404).json({ status: 'error', message: 'Project not found' });
     }
 
-    const { name, description, status } = req.body;
+    const { name, description, status, deadline } = req.body;
     if (name !== undefined) project.name = name;
     if (description !== undefined) project.description = description;
     if (status !== undefined) project.status = status;
+    if (deadline !== undefined) project.deadline = deadline;
 
     await project.save();
 

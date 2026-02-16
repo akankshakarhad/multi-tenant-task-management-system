@@ -150,7 +150,7 @@
 .comment-meta { display: flex; align-items: center; gap: 8px; }
 .comment-time { font-size: 12px; color: #aaa; }
 .comment-text { font-size: 14px; color: #444; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
-.comment-mentions { margin-top: 6px; font-size: 12px; color: #4a90d9; font-weight: 500; }
+.mention-highlight { font-weight: 700; color: #4a90d9; }
 
 /* Comment Form */
 .comment-form { display: flex; flex-direction: column; gap: 10px; }

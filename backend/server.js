@@ -116,6 +116,9 @@ app.use('/api/comments', require('./routes/comments'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/activity-logs', require('./routes/activityLogs'));
 app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/profile', require('./routes/profile'));
+app.use('/api/feedback', require('./routes/feedback'));
+app.use('/api/goals', require('./routes/goals'));
 
 app.get('/', (req, res) => {
   res.json({ message: 'Multi-Tenant Task Management API' });

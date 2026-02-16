@@ -394,6 +394,13 @@ router.put('/:id', updateTaskRules, permit('tasks:update'), async (req, res, nex
         }
         const oldStatus = task.status;
         task.status = req.body.status;
+
+        if (task.status === 'DONE' && !task.completedAt) {
+          task.completedAt = new Date();
+        } else if (task.status !== 'DONE' && task.completedAt) {
+          task.completedAt = null;
+        }
+
         await task.save();
 
         await logActivity('TASK_STATUS_CHANGED', req.user, task, {
@@ -431,6 +438,12 @@ router.put('/:id', updateTaskRules, permit('tasks:update'), async (req, res, nex
       }
       const oldStatus = task.status;
       task.status = status;
+
+      if (task.status === 'DONE' && !task.completedAt) {
+        task.completedAt = new Date();
+      } else if (task.status !== 'DONE' && task.completedAt) {
+        task.completedAt = null;
+      }
 
       await logActivity('TASK_STATUS_CHANGED', req.user, task, {
         description: `Status changed from ${oldStatus} to ${status}`,

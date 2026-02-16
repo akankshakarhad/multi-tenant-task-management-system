@@ -37,6 +37,10 @@ const projectSchema = new mongoose.Schema(
       enum: ['ACTIVE', 'ARCHIVED', 'COMPLETED'],
       default: 'ACTIVE',
     },
+    deadline: {
+      type: Date,
+      default: null,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
