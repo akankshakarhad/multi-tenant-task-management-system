@@ -5,6 +5,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
+const compression = require('compression');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const connectDB = require('./config/db');
@@ -26,11 +27,19 @@ emailService.init();
 const app = express();
 const server = http.createServer(app);
 
+// ── Trust proxy (required behind Render/Heroku/nginx) ──────
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // ── Security headers ────────────────────────────────────────
 app.use(helmet());
 
+// ── Gzip compression ────────────────────────────────────────
+app.use(compression());
+
 // ── CORS ────────────────────────────────────────────────────
-const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000').split(',');
+const allowedOrigins = (process.env.CLIENT_URL || process.env.CORS_ORIGIN || 'http://localhost:3000').split(',');
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
@@ -50,14 +59,16 @@ app.use(hpp());
 app.use('/api/auth', authLimiter);
 app.use(/\/api\/(?!auth)/, apiLimiter);
 
-// ── Request logging ─────────────────────────────────────────
-app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.originalUrl}`, {
-    ip: req.ip,
-    userAgent: req.get('User-Agent'),
+// ── Request logging (verbose in dev, minimal in prod) ───────
+if (process.env.NODE_ENV !== 'production') {
+  app.use((req, res, next) => {
+    logger.info(`${req.method} ${req.originalUrl}`, {
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+    });
+    next();
   });
-  next();
-});
+}
 
 // ── Socket.io setup ─────────────────────────────────────────
 const io = new Server(server, {
@@ -108,6 +119,11 @@ app.use('/api/dashboard', require('./routes/dashboard'));
 
 app.get('/', (req, res) => {
   res.json({ message: 'Multi-Tenant Task Management API' });
+});
+
+// ── Health check ───────────────────────────────────────────
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK' });
 });
 
 // ── 404 handler ─────────────────────────────────────────────

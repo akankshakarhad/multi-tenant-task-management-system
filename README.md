@@ -776,6 +776,79 @@ Swagger UI is available at **http://localhost:5000/api-docs/** once the backend 
 
 ---
 
+## Deployment Guide
+
+### Backend — Deploy on Render (Web Service)
+
+1. Go to [render.com](https://render.com) and create a **New Web Service**
+2. Connect your GitHub repo
+3. Configure:
+   - **Root Directory:** `backend`
+   - **Build Command:** `npm install`
+   - **Start Command:** `npm start`
+4. Set **Environment Variables:**
+
+   | Variable       | Value                                      |
+   | -------------- | ------------------------------------------ |
+   | `NODE_ENV`     | `production`                               |
+   | `PORT`         | `10000` (Render assigns automatically)     |
+   | `MONGO_URI`    | Your MongoDB Atlas connection string       |
+   | `JWT_SECRET`   | A strong random string (32+ chars)         |
+   | `CLIENT_URL`   | Your deployed frontend URL (e.g., `https://your-app.vercel.app`) |
+
+5. Click **Create Web Service**
+6. Once deployed, note the backend URL (e.g., `https://your-backend.onrender.com`)
+7. Verify with: `GET https://your-backend.onrender.com/health`
+
+### Frontend — Deploy on Vercel (Recommended)
+
+1. Go to [vercel.com](https://vercel.com) and import your GitHub repo
+2. Configure:
+   - **Root Directory:** `frontend`
+   - **Framework Preset:** Create React App
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `build`
+3. Set **Environment Variables:**
+
+   | Variable              | Value                                           |
+   | --------------------- | ----------------------------------------------- |
+   | `REACT_APP_API_URL`   | `https://your-backend.onrender.com/api`         |
+   | `REACT_APP_SOCKET_URL`| `https://your-backend.onrender.com`             |
+
+4. Click **Deploy**
+
+### Frontend — Alternative: Deploy on Render (Static Site)
+
+1. Create a **New Static Site** on Render
+2. Connect your GitHub repo
+3. Configure:
+   - **Root Directory:** `frontend`
+   - **Build Command:** `npm install && npm run build`
+   - **Publish Directory:** `build`
+4. Set the same environment variables as the Vercel option above
+5. Add a **Rewrite Rule**: `/*` → `/index.html` (for client-side routing)
+
+### MongoDB Atlas Setup
+
+1. Go to [cloud.mongodb.com](https://cloud.mongodb.com)
+2. Create a free M0 cluster (or use existing)
+3. Under **Network Access**, add `0.0.0.0/0` to allow connections from Render
+4. Under **Database Access**, create a user with read/write permissions
+5. Click **Connect** → **Connect your application** → copy the connection string
+6. Use this as your `MONGO_URI` environment variable
+
+---
+
+## Production Notes
+
+- **Logging**: Winston is already configured with file + console transports. In production, verbose request logging is automatically disabled
+- **Compression**: Gzip compression is enabled via the `compression` middleware to reduce response sizes
+- **Rate Limiting**: Auth endpoints are limited to 30 req/15min; API endpoints to 1000 req/15min. `trust proxy` is enabled in production so rate limiting works correctly behind Render's proxy
+- **Health Check**: `GET /health` returns `{ "status": "OK" }` — use this for uptime monitoring
+- **Security**: Helmet.js headers, NoSQL injection prevention, HPP protection, and input validation are all active in production
+
+---
+
 ## License
 
 This project is for educational and portfolio purposes.
