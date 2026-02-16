@@ -72,7 +72,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // ── Socket.io setup ─────────────────────────────────────────
 const io = new Server(server, {
-  cors: { origin: allowedOrigins, methods: ['GET', 'POST'] },
+  cors: { origin: allowedOrigins, methods: ['GET', 'POST'], credentials: true },
 });
 
 // Authenticate socket connections via JWT
@@ -138,3 +138,19 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
 });
+
+// ── Graceful shutdown ──────────────────────────────────────
+const mongoose = require('mongoose');
+
+const shutdown = (signal) => {
+  logger.info(`${signal} received — shutting down gracefully`);
+  server.close(() => {
+    mongoose.connection.close(false).then(() => {
+      logger.info('MongoDB connection closed');
+      process.exit(0);
+    });
+  });
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
