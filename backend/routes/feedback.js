@@ -17,7 +17,56 @@ const createFeedbackRules = [
   body('completedInTimeline').optional().isBoolean(),
 ];
 
-// POST /api/feedback — Create feedback (MANAGER only)
+/**
+ * @swagger
+ * /feedback:
+ *   post:
+ *     summary: Create feedback for a team member
+ *     tags: [Feedback]
+ *     security:
+ *       - bearerAuth: []
+ *     description: |
+ *       Managers can give performance feedback to MEMBER-role users on
+ *       projects they share. One feedback per manager-user-project combination.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [targetUserId, projectId, rating]
+ *             properties:
+ *               targetUserId:
+ *                 type: string
+ *                 description: ID of the member receiving feedback
+ *               projectId:
+ *                 type: string
+ *                 description: ID of the shared project
+ *               rating:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 5
+ *               comment:
+ *                 type: string
+ *                 maxLength: 1000
+ *               completedInTimeline:
+ *                 type: boolean
+ *     responses:
+ *       201:
+ *         description: Feedback created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserFeedback'
+ *       400:
+ *         description: Validation error
+ *       403:
+ *         description: Not allowed (target not a MEMBER, or not in same project)
+ *       404:
+ *         description: Target user or project not found
+ *       409:
+ *         description: Duplicate feedback for this user-project combination
+ */
 router.post('/', createFeedbackRules, permit('feedback:create'), async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -97,7 +146,35 @@ router.post('/', createFeedbackRules, permit('feedback:create'), async (req, res
   }
 });
 
-// GET /api/feedback?targetUser=xxx — List feedback
+/**
+ * @swagger
+ * /feedback:
+ *   get:
+ *     summary: List feedback
+ *     tags: [Feedback]
+ *     security:
+ *       - bearerAuth: []
+ *     description: |
+ *       ADMIN/MANAGER can filter by targetUser. MEMBER sees only their own feedback.
+ *     parameters:
+ *       - in: query
+ *         name: targetUser
+ *         schema:
+ *           type: string
+ *         description: Filter by target user ID (ADMIN/MANAGER only)
+ *     responses:
+ *       200:
+ *         description: Feedback list
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/UserFeedback'
+ */
 router.get('/', permit('feedback:list'), async (req, res, next) => {
   try {
     const filter = { companyId: req.user.companyId };

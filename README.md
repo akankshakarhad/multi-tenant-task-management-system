@@ -30,6 +30,8 @@ Key highlights:
 - **Real-time** — Socket.io delivers instant notifications
 - **Kanban** — Drag-and-drop board with validated status transitions
 - **Audit Trail** — Every significant action is logged for compliance
+- **User Profiles** — Analytics dashboards with activity heatmaps and performance stats
+- **Goals & Feedback** — Managers set monthly targets and rate team members
 
 ---
 
@@ -93,6 +95,27 @@ Key highlights:
 - Admin-only audit log viewer with filtering and pagination
 - Metadata storage for context on each action
 
+### User Profile & Analytics
+- Personal profile with avatar, role badge, and join date
+- Performance stats — tasks completed, on-time rate, active projects, contributions
+- GitHub-style activity heatmap (past year)
+- Monthly goals with progress bars
+- Feedback history with star ratings
+- Per-project breakdown (completion rate, ratings, deadlines)
+- Managers/Admins can view any team member's profile
+
+### Goals & Feedback
+- Managers can set monthly task completion goals per user per project
+- Goal progress tracked automatically against completed tasks
+- Star-based (1–5) performance feedback from managers to members
+- Completed-on-time indicator per feedback
+- Goals history view with team member sidebar and feedback forms
+- Notifications for goal assignments and feedback received
+
+### Settings
+- User avatar menu with Profile, Settings, and Logout options
+- Time-based dashboard greeting (Good morning/afternoon/evening)
+
 ### Security
 - Helmet.js security headers
 - Rate limiting (30 req/15min auth, 1000 req/15min API)
@@ -116,10 +139,10 @@ Key highlights:
 │  │ Signup   │  │ Modal    │  │ Context  │  │ Dashboard.css │   │
 │  │ Dashboard│  │ Kanban   │  │          │  │ Kanban.css    │   │
 │  │ Projects │  │ Toast    │  │          │  │ Tasks.css     │   │
-│  │ Tasks    │  │ Notif    │  │          │  │ ...           │   │
-│  │ Users    │  │ Bell     │  │          │  │               │   │
+│  │ Tasks    │  │ Notif    │  │          │  │ Profile.css   │   │
+│  │ Profile  │  │ Bell     │  │          │  │ Goals.css     │   │
+│  │ Goals    │  │ Avatar   │  │          │  │ ...           │   │
 │  │ AuditLog │  │Protected │  │          │  │               │   │
-│  │ ...      │  │ Route    │  │          │  │               │   │
 │  └──────────┘  └──────────┘  └──────────┘  └───────────────┘   │
 │         │              │                                        │
 │         ▼              ▼                                        │
@@ -147,6 +170,7 @@ Key highlights:
 │  │                       Routes                             │   │
 │  │  /auth  /users  /projects  /tasks  /comments             │   │
 │  │  /notifications  /activity-logs  /dashboard              │   │
+│  │  /profile  /feedback  /goals                             │   │
 │  └──────────────────────────────────────────────────────────┘   │
 │         │                                    │                  │
 │         ▼                                    ▼                  │
@@ -161,7 +185,7 @@ Key highlights:
 │  ┌──────────────────────────────────────────────────────────┐   │
 │  │                   Mongoose Models                        │   │
 │  │  User │ Company │ Project │ Task │ Comment               │   │
-│  │  Notification │ ActivityLog                              │   │
+│  │  Notification │ ActivityLog │ UserGoal │ UserFeedback    │   │
 │  └──────────────────────────────────────────────────────────┘   │
 │                              │                                  │
 └──────────────────────────────┼──────────────────────────────────┘
@@ -182,7 +206,7 @@ Key highlights:
 
 | Layer        | Technology                                                    |
 | ------------ | ------------------------------------------------------------- |
-| **Frontend** | React 19, React Router DOM 7, Axios, Socket.io-client         |
+| **Frontend** | React 19, React Router DOM 7, Axios, Socket.io-client, Recharts |
 | **UI/DnD**   | @hello-pangea/dnd (drag-and-drop for Kanban)                  |
 | **Backend**  | Node.js, Express 4, Socket.io                                 |
 | **Database** | MongoDB with Mongoose 8 ODM                                   |
@@ -215,11 +239,13 @@ multi-tenant-task-management-system/
 │   ├── models/
 │   │   ├── User.js                # User schema + soft delete
 │   │   ├── Company.js             # Company/tenant schema
-│   │   ├── Project.js             # Project schema + members
-│   │   ├── Task.js                # Task schema + status flow
+│   │   ├── Project.js             # Project schema + members + deadline
+│   │   ├── Task.js                # Task schema + status flow + completedAt
 │   │   ├── Comment.js             # Comment schema + mentions
 │   │   ├── Notification.js        # Notification (polymorphic)
-│   │   └── ActivityLog.js         # Audit log schema
+│   │   ├── ActivityLog.js         # Audit log schema
+│   │   ├── UserGoal.js            # Monthly task goals per user
+│   │   └── UserFeedback.js        # Manager-to-member feedback
 │   │
 │   ├── routes/
 │   │   ├── auth.js                # Signup, login, me
@@ -229,7 +255,10 @@ multi-tenant-task-management-system/
 │   │   ├── comments.js            # Comments + mentions
 │   │   ├── notifications.js       # Notification management
 │   │   ├── activityLogs.js        # Audit log retrieval
-│   │   └── dashboard.js           # Dashboard aggregations
+│   │   ├── dashboard.js           # Dashboard aggregations
+│   │   ├── profile.js             # User profile + analytics
+│   │   ├── feedback.js            # Performance feedback CRUD
+│   │   └── goals.js               # Monthly goals CRUD
 │   │
 │   ├── services/
 │   │   ├── notificationService.js # Create + emit + email
@@ -247,10 +276,11 @@ multi-tenant-task-management-system/
 │   │   ├── components/
 │   │   │   ├── KanbanBoard.jsx    # Drag-and-drop board
 │   │   │   ├── Modal.jsx          # Reusable modal
-│   │   │   ├── Navbar.jsx         # Navigation + logout
+│   │   │   ├── Navbar.jsx         # Navigation with scroll effect
 │   │   │   ├── NotificationBell.jsx # Real-time notifications
 │   │   │   ├── ProtectedRoute.jsx # Auth guard
-│   │   │   └── Toast.jsx          # Toast notifications
+│   │   │   ├── Toast.jsx          # Toast notifications
+│   │   │   └── UserAvatar.jsx     # Floating avatar with menu
 │   │   │
 │   │   ├── context/
 │   │   │   └── AuthContext.jsx    # Global auth state
@@ -265,7 +295,11 @@ multi-tenant-task-management-system/
 │   │   │   ├── Tasks.jsx          # Task list + Kanban toggle
 │   │   │   ├── TaskDetail.jsx     # Task detail + comments
 │   │   │   ├── Users.jsx          # User management
-│   │   │   └── AuditLog.jsx       # Activity log viewer
+│   │   │   ├── AuditLog.jsx       # Activity log viewer
+│   │   │   ├── Profile.jsx        # User profile + analytics
+│   │   │   ├── Goals.jsx          # Goals & feedback management
+│   │   │   ├── Feedback.jsx       # Feedback (redirects to Goals)
+│   │   │   └── Settings.jsx       # User settings
 │   │   │
 │   │   ├── styles/                # CSS files per component
 │   │   ├── api.js                 # Axios instance + interceptors
@@ -354,6 +388,30 @@ multi-tenant-task-management-system/
 | ------ | -------- | ------------------------ | ---- |
 | GET    | `/`      | Dashboard summary stats  | Yes  |
 
+### Profile — `/api/profile`
+
+| Method | Endpoint     | Description                                  | Role Required           |
+| ------ | ------------ | -------------------------------------------- | ----------------------- |
+| GET    | `/`          | Get own profile with analytics               | All authenticated       |
+| GET    | `/:userId`   | Get another user's profile                   | ADMIN, MANAGER          |
+
+Returns: user info, performance stats (tasks completed, on-time rate, active projects, contributions), activity heatmap, monthly goals with progress, feedback history, per-project breakdown with ratings.
+
+### Feedback — `/api/feedback`
+
+| Method | Endpoint | Description                              | Role Required           |
+| ------ | -------- | ---------------------------------------- | ----------------------- |
+| POST   | `/`      | Give feedback to a team member           | MANAGER                 |
+| GET    | `/`      | List feedback (filter by `targetUser`)   | All (MEMBER sees own)   |
+
+### Goals — `/api/goals`
+
+| Method | Endpoint | Description                              | Role Required           |
+| ------ | -------- | ---------------------------------------- | ----------------------- |
+| POST   | `/`      | Create monthly goal for a user           | ADMIN, MANAGER          |
+| PUT    | `/:id`   | Update goal target count or description  | ADMIN, MANAGER          |
+| GET    | `/`      | List goals (filter by `userId`, `month`) | All (MEMBER sees own)   |
+
 ---
 
 ## Database Schema (ER Diagram)
@@ -397,6 +455,7 @@ erDiagram
         String companyId FK "tenant key"
         ObjectId createdBy FK "ref: User"
         String status "ACTIVE | ARCHIVED | COMPLETED"
+        Date deadline "nullable"
         Boolean isDeleted
         Date deletedAt
         Date createdAt
@@ -415,6 +474,7 @@ erDiagram
         String status "TODO | IN_PROGRESS | IN_REVIEW | DONE | BLOCKER"
         String priority "LOW | MEDIUM | HIGH | URGENT"
         Date dueDate
+        Date completedAt "auto-set when DONE"
         Boolean isDeleted
         Date deletedAt
         Date createdAt
@@ -438,11 +498,11 @@ erDiagram
         ObjectId _id PK
         ObjectId recipient FK "ref: User"
         ObjectId triggeredBy FK "ref: User"
-        String type "TASK_ASSIGNED | STATUS_CHANGED | COMMENT_ADDED | COMMENT_MENTIONED"
+        String type "TASK_ASSIGNED | STATUS_CHANGED | COMMENT_ADDED | COMMENT_MENTIONED | GOAL_ASSIGNED | FEEDBACK_RECEIVED"
         String message
         ObjectId company FK "ref: Company"
         String companyId FK "tenant key"
-        String relatedType "Task | Comment (polymorphic)"
+        String relatedType "Task | Comment | Goal | Feedback (polymorphic)"
         ObjectId relatedId "polymorphic ref"
         Boolean read
         Date readAt
@@ -460,6 +520,35 @@ erDiagram
         ObjectId targetId "polymorphic ref"
         Mixed metadata
         Date createdAt
+    }
+
+    UserGoal {
+        ObjectId _id PK
+        ObjectId user FK "ref: User"
+        ObjectId project FK "ref: Project"
+        ObjectId company FK "ref: Company"
+        String companyId FK "tenant key"
+        Date month "1st of target month"
+        Number targetCount "min: 1"
+        String description "max 500 chars"
+        Boolean isDeleted
+        Date createdAt
+        Date updatedAt
+    }
+
+    UserFeedback {
+        ObjectId _id PK
+        ObjectId targetUser FK "ref: User"
+        ObjectId givenBy FK "ref: User"
+        ObjectId project FK "ref: Project"
+        ObjectId company FK "ref: Company"
+        String companyId FK "tenant key"
+        Number rating "1-5"
+        String comment "max 1000 chars"
+        Boolean completedInTimeline "nullable"
+        Boolean isDeleted
+        Date createdAt
+        Date updatedAt
     }
 
     Company ||--o{ User : "has many"
@@ -481,6 +570,15 @@ erDiagram
 
     Project ||--o{ Task : "has many"
     Task ||--o{ Comment : "has many"
+
+    User ||--o{ UserGoal : "goals assigned"
+    Project ||--o{ UserGoal : "goals per project"
+    Company ||--o{ UserGoal : "has many"
+
+    User ||--o{ UserFeedback : "targetUser"
+    User ||--o{ UserFeedback : "givenBy"
+    Project ||--o{ UserFeedback : "feedback per project"
+    Company ||--o{ UserFeedback : "has many"
 ```
 
 ### dbdiagram.io Format
@@ -524,6 +622,7 @@ Table Project {
   companyId String [not null, note: "tenant isolation key"]
   createdBy ObjectId [ref: > User._id, not null]
   status String [default: "ACTIVE", note: "ACTIVE | ARCHIVED | COMPLETED"]
+  deadline Date [note: "nullable"]
   isDeleted Boolean [default: false]
   deletedAt Date
   createdAt Date
@@ -549,6 +648,7 @@ Table Task {
   status String [default: "TODO", note: "TODO | IN_PROGRESS | IN_REVIEW | DONE | BLOCKER"]
   priority String [default: "MEDIUM", note: "LOW | MEDIUM | HIGH | URGENT"]
   dueDate Date
+  completedAt Date [note: "auto-set when status=DONE"]
   isDeleted Boolean [default: false]
   deletedAt Date
   createdAt Date
@@ -579,11 +679,11 @@ Table Notification {
   _id ObjectId [pk]
   recipient ObjectId [ref: > User._id, not null]
   triggeredBy ObjectId [ref: > User._id, not null]
-  type String [not null, note: "TASK_ASSIGNED | TASK_STATUS_CHANGED | COMMENT_ADDED | COMMENT_MENTIONED"]
+  type String [not null, note: "TASK_ASSIGNED | TASK_STATUS_CHANGED | COMMENT_ADDED | COMMENT_MENTIONED | GOAL_ASSIGNED | FEEDBACK_RECEIVED"]
   message String [not null]
   company ObjectId [ref: > Company._id, not null]
   companyId String [not null, note: "tenant isolation key"]
-  relatedType String [note: "Task | Comment (polymorphic)"]
+  relatedType String [note: "Task | Comment | Goal | Feedback (polymorphic)"]
   relatedId ObjectId [note: "polymorphic reference"]
   read Boolean [default: false]
   readAt Date
@@ -601,6 +701,46 @@ Table ActivityLog {
   targetId ObjectId [note: "polymorphic reference"]
   metadata Mixed [note: "flexible context data"]
   createdAt Date
+}
+
+Table UserGoal {
+  _id ObjectId [pk]
+  user ObjectId [ref: > User._id, not null]
+  project ObjectId [ref: > Project._id, not null]
+  company ObjectId [ref: > Company._id, not null]
+  companyId String [not null, note: "tenant isolation key"]
+  month Date [not null, note: "1st of target month"]
+  targetCount Number [not null, note: "min: 1"]
+  description String [default: "", note: "max 500 chars"]
+  isDeleted Boolean [default: false]
+  createdAt Date
+  updatedAt Date
+
+  indexes {
+    (user, project, month) [unique]
+    (companyId, user)
+  }
+}
+
+Table UserFeedback {
+  _id ObjectId [pk]
+  targetUser ObjectId [ref: > User._id, not null]
+  givenBy ObjectId [ref: > User._id, not null]
+  project ObjectId [ref: > Project._id, not null]
+  company ObjectId [ref: > Company._id, not null]
+  companyId String [not null, note: "tenant isolation key"]
+  rating Number [not null, note: "1-5"]
+  comment String [default: "", note: "max 1000 chars"]
+  completedInTimeline Boolean [note: "nullable"]
+  isDeleted Boolean [default: false]
+  createdAt Date
+  updatedAt Date
+
+  indexes {
+    (givenBy, targetUser, project) [unique]
+    (targetUser, companyId)
+    (project, targetUser)
+  }
 }
 ```
 
@@ -624,6 +764,11 @@ Table ActivityLog {
 | User         | Notification | 1 : N   | `Notification.recipient`  | User receives notifications |
 | User         | Notification | 1 : N   | `Notification.triggeredBy`| User triggers notifications |
 | User         | ActivityLog  | 1 : N   | `ActivityLog.performedBy` | User performs logged actions |
+| User         | UserGoal     | 1 : N   | `UserGoal.user`           | User has monthly goals      |
+| Project      | UserGoal     | 1 : N   | `UserGoal.project`        | Goals scoped to project     |
+| User         | UserFeedback | 1 : N   | `UserFeedback.targetUser` | User receives feedback      |
+| User         | UserFeedback | 1 : N   | `UserFeedback.givenBy`    | Manager gives feedback      |
+| Project      | UserFeedback | 1 : N   | `UserFeedback.project`    | Feedback scoped to project  |
 
 ### Architecture Notes
 
@@ -758,6 +903,24 @@ Swagger UI is available at **http://localhost:5000/api-docs/** once the backend 
 ### Notifications
 ![Notifications 1](screenshots/notification_1.jpg)
 ![Notifications 2](screenshots/notification_2.jpg)
+
+### User Profile
+![Profile Header & Analytics](screenshots/profie_1.jpg)
+![Profile Goals & Feedback](screenshots/profile_2.jpg)
+
+### User Profile (Viewed by Manager)
+![Manager Viewing Member Profile](screenshots/user_profile_section.jpg)
+![Member Monthly Goals & Feedback](screenshots/user_profile_section_2.jpg)
+
+### Manager Profile
+![Manager Profile](screenshots/manager_profile_section.jpg)
+
+### User Avatar & Settings Menu
+![Avatar Menu with Profile, Settings, Logout](screenshots/profile_section.jpg)
+
+### Goals Management
+![Assign Goal Form](screenshots/add_goals.jpg)
+![Goals History with Feedback](screenshots/goals_history.jpg)
 
 ### Audit Logs
 ![Audit Log 1](screenshots/audit_log_1.jpg)

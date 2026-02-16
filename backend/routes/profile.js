@@ -11,6 +11,144 @@ const { protect, permit } = require('../middleware/auth');
 const router = express.Router();
 router.use(protect);
 
+/**
+ * @swagger
+ * /profile/{userId}:
+ *   get:
+ *     summary: Get user profile with analytics
+ *     tags: [Profile]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: User ID to view (omit for own profile). MEMBER can only view own profile.
+ *     responses:
+ *       200:
+ *         description: User profile with analytics data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                       format: email
+ *                     designation:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *                       enum: [ADMIN, MANAGER, MEMBER]
+ *                     companyName:
+ *                       type: string
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                 analytics:
+ *                   type: object
+ *                   properties:
+ *                     tasksCompleted:
+ *                       type: integer
+ *                     onTimeCompletionRate:
+ *                       type: number
+ *                       description: Percentage (0-100)
+ *                     activeProjects:
+ *                       type: integer
+ *                     totalContributions:
+ *                       type: integer
+ *                 activityHeatmap:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       date:
+ *                         type: string
+ *                         example: '2026-01-15'
+ *                       count:
+ *                         type: integer
+ *                 monthlyGoals:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       project:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           name:
+ *                             type: string
+ *                       month:
+ *                         type: string
+ *                         format: date-time
+ *                       targetCount:
+ *                         type: integer
+ *                       description:
+ *                         type: string
+ *                       completedCount:
+ *                         type: integer
+ *                       progress:
+ *                         type: integer
+ *                         description: Percentage (0-100)
+ *                 feedback:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/UserFeedback'
+ *                 projectsBreakdown:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                       deadline:
+ *                         type: string
+ *                         format: date-time
+ *                         nullable: true
+ *                       totalTasks:
+ *                         type: integer
+ *                       completedTasks:
+ *                         type: integer
+ *                       onTimeTasks:
+ *                         type: integer
+ *                       completionRate:
+ *                         type: integer
+ *                       avgRating:
+ *                         type: number
+ *                         nullable: true
+ *                       feedbackCount:
+ *                         type: integer
+ *                       feedback:
+ *                         type: array
+ *                         items:
+ *                           $ref: '#/components/schemas/UserFeedback'
+ *                 overallRating:
+ *                   type: number
+ *                   nullable: true
+ *                   description: Average rating (1-5)
+ *                 totalFeedbackCount:
+ *                   type: integer
+ *       403:
+ *         description: Access denied (MEMBER viewing another user)
+ *       404:
+ *         description: User not found
+ */
 router.get('/:userId?', permit('profile:view'), async (req, res, next) => {
   try {
     const { companyId } = req.user;

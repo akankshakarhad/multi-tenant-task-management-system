@@ -22,7 +22,57 @@ const updateGoalRules = [
   body('description').optional().isString().isLength({ max: 500 }).withMessage('Description must be under 500 characters'),
 ];
 
-// POST /api/goals — Create a monthly goal (ADMIN/MANAGER)
+/**
+ * @swagger
+ * /goals:
+ *   post:
+ *     summary: Create a monthly goal for a user
+ *     tags: [Goals]
+ *     security:
+ *       - bearerAuth: []
+ *     description: |
+ *       ADMIN/MANAGER can set monthly task completion goals for users on specific projects.
+ *       One goal per user-project-month combination (unique constraint).
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [userId, projectId, month, targetCount]
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: ID of the user this goal is for
+ *               projectId:
+ *                 type: string
+ *                 description: ID of the project
+ *               month:
+ *                 type: string
+ *                 format: date
+ *                 description: Any date in the target month (normalized to 1st)
+ *                 example: '2026-02-01'
+ *               targetCount:
+ *                 type: integer
+ *                 minimum: 1
+ *                 description: Number of tasks to complete
+ *               description:
+ *                 type: string
+ *                 maxLength: 500
+ *     responses:
+ *       201:
+ *         description: Goal created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserGoal'
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: User or project not found
+ *       409:
+ *         description: Goal already exists for this user-project-month
+ */
 router.post('/', createGoalRules, permit('goals:create'), async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -78,7 +128,46 @@ router.post('/', createGoalRules, permit('goals:create'), async (req, res, next)
   }
 });
 
-// PUT /api/goals/:id — Update targetCount
+/**
+ * @swagger
+ * /goals/{id}:
+ *   put:
+ *     summary: Update a goal's target count or description
+ *     tags: [Goals]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Goal ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               targetCount:
+ *                 type: integer
+ *                 minimum: 1
+ *               description:
+ *                 type: string
+ *                 maxLength: 500
+ *     responses:
+ *       200:
+ *         description: Goal updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserGoal'
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Goal not found
+ */
 router.put('/:id', updateGoalRules, permit('goals:update'), async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -107,7 +196,43 @@ router.put('/:id', updateGoalRules, permit('goals:update'), async (req, res, nex
   }
 });
 
-// GET /api/goals?userId=xxx&month=YYYY-MM — List goals
+/**
+ * @swagger
+ * /goals:
+ *   get:
+ *     summary: List goals
+ *     tags: [Goals]
+ *     security:
+ *       - bearerAuth: []
+ *     description: |
+ *       ADMIN/MANAGER can filter by userId and month. MEMBER sees only their own goals.
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         description: Filter by user ID (ADMIN/MANAGER only)
+ *       - in: query
+ *         name: month
+ *         schema:
+ *           type: string
+ *           example: '2026-02'
+ *         description: Filter by month (YYYY-MM format)
+ *     responses:
+ *       200:
+ *         description: Goals list
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/UserGoal'
+ *       403:
+ *         description: Access denied (MEMBER viewing another user's goals)
+ */
 router.get('/', permit('goals:list'), async (req, res, next) => {
   try {
     const filter = { companyId: req.user.companyId, isDeleted: false };
