@@ -1,0 +1,74 @@
+/* Timeline */
+.timeline {
+  position: relative;
+  padding-left: 36px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 15px; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, #4a90d9, #e0e0e0);
+}
+
+.timeline-item {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding-bottom: 24px;
+  animation: timelineItemIn 0.4s ease backwards;
+}
+
+.timeline-item:nth-child(1) { animation-delay: 0.05s; }
+.timeline-item:nth-child(2) { animation-delay: 0.1s; }
+.timeline-item:nth-child(3) { animation-delay: 0.15s; }
+.timeline-item:nth-child(4) { animation-delay: 0.2s; }
+.timeline-item:nth-child(5) { animation-delay: 0.25s; }
+
+@keyframes timelineItemIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.timeline-item:last-child { padding-bottom: 0; }
+
+.timeline-marker {
+  position: absolute;
+  left: -36px;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #4a90d9;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1;
+  transition: all 0.2s;
+}
+
+.timeline-item:hover .timeline-marker {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px rgba(74, 144, 217, 0.15);
+}
+
+.timeline-icon { font-size: 14px; }
+
+.timeline-content {
+  flex: 1;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  padding: 16px 20px;
+  transition: all 0.2s ease;
+}
+
+.timeline-content:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transform: translateX(4px);
+}
+
+.timeline-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.timeline-action { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.timeline-time { font-size: 12px; color: #aaa; }
+.timeline-description { font-size: 14px; color: #444; line-height: 1.5; margin: 0; }
+.timeline-footer { display: flex; gap: 12px; margin-top: 8px; font-size: 12px; color: #999; }
+.timeline-actor { font-weight: 500; }

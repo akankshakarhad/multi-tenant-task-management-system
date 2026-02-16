@@ -1,0 +1,224 @@
+/* ========== OVERLAY ========== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: overlayFadeIn 0.2s ease;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ========== MODAL BOX ========== */
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 500px;
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+  animation: modalSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ========== HEADER ========== */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  z-index: 1;
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  color: #333;
+  background: #f0f0f0;
+}
+
+/* ========== BODY ========== */
+.modal-body {
+  padding: 24px;
+}
+
+/* ========== FORM ELEMENTS ========== */
+.modal-body .form-group {
+  margin-bottom: 16px;
+}
+
+.modal-body .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #333;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.modal-body .form-group input,
+.modal-body .form-group select,
+.modal-body .form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  background: #fafafa;
+  color: #333;
+  transition: all 0.25s;
+  box-sizing: border-box;
+}
+
+.modal-body .form-group textarea {
+  resize: vertical;
+}
+
+.modal-body .form-group input::placeholder,
+.modal-body .form-group textarea::placeholder {
+  color: #aaa;
+}
+
+.modal-body .form-group input:focus,
+.modal-body .form-group select:focus,
+.modal-body .form-group textarea:focus {
+  border-color: #4a90d9;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.1);
+}
+
+.modal-body .form-group select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.modal-body .form-group select option {
+  background: #fff;
+  color: #333;
+}
+
+.modal-body .form-row {
+  display: flex;
+  gap: 14px;
+}
+
+.modal-body .form-row .form-group {
+  flex: 1;
+}
+
+/* ========== ERROR ========== */
+.modal-body .error-message {
+  background: #fee;
+  color: #c0392b;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  border: 1px solid #fcc;
+}
+
+/* ========== BUTTONS ========== */
+.modal-body .btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+  margin-top: 8px;
+}
+
+.modal-body .btn-primary {
+  background: linear-gradient(135deg, #4a90d9, #357abd);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(74, 144, 217, 0.3);
+}
+
+.modal-body .btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(74, 144, 217, 0.4);
+  transform: translateY(-1px);
+}
+
+.modal-body .btn-primary:disabled {
+  background: #b0c4de;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ========== CHECKBOX LIST (for member selects etc.) ========== */
+.checkbox-list {
+  max-height: 250px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.checkbox-item:hover {
+  background: #f0f7ff;
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #4a90d9;
+}
+
+.checkbox-meta {
+  color: #888;
+  font-size: 13px;
+  margin-left: auto;
+}
