@@ -40,10 +40,7 @@ app.use(compression());
 
 // ── CORS ────────────────────────────────────────────────────
 const allowedOrigins = (process.env.CLIENT_URL || process.env.CORS_ORIGIN || 'http://localhost:3000').split(',');
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-}));
+app.use(cors());
 
 // ── Body parsing with size limits ───────────────────────────
 app.use(express.json({ limit: '10kb' }));
