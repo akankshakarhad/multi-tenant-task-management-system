@@ -1,9 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 
 const AuthContext = createContext();
-
-const API_URL = `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/auth`;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -20,9 +18,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const res = await axios.get(`${API_URL}/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get('/auth/me');
       setUser(res.data);
     } catch {
       localStorage.removeItem('token');
@@ -34,7 +30,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signup = async (formData) => {
-    const res = await axios.post(`${API_URL}/signup`, formData);
+    const res = await api.post('/auth/signup', formData);
     localStorage.setItem('token', res.data.token);
     setToken(res.data.token);
     setUser(res.data);
@@ -42,7 +38,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    const res = await axios.post(`${API_URL}/login`, { email, password });
+    const res = await api.post('/auth/login', { email, password });
     localStorage.setItem('token', res.data.token);
     setToken(res.data.token);
     setUser(res.data);

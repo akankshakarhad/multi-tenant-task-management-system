@@ -20,8 +20,11 @@ const NotificationBell = () => {
     fetchUnreadCount();
 
     // Connect to socket.io for real-time notifications
-    const socketUrl = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
-    socketRef.current = io(socketUrl, {
+    const SOCKET_URL =
+      window.location.hostname === 'localhost'
+        ? 'http://localhost:5000'
+        : undefined;
+    socketRef.current = io(SOCKET_URL, {
       auth: { token },
     });
 

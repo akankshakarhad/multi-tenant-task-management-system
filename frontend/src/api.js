@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API_BASE =
-  process.env.NODE_ENV === 'development'
+  window.location.hostname === 'localhost'
     ? 'http://localhost:5000/api'
     : '/api';
 
